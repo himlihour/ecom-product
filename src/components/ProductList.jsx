@@ -3,14 +3,10 @@ import { IconStar, IconPlus } from './Icons';
 
 export default function ProductList({ products, cart, onAddToCart }) {
   return (
-    <div className="space-y-8">
-      {/* Header Banner */}
+    <div className="space-y-8 relative z-10">
+      {/* Header Banner without unwanted tags */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>SPECIFICATION REPOSITORY / PRACTICAL EXERCISE 1</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
             Hardware Inventory Catalog
           </h1>
@@ -29,14 +25,14 @@ export default function ProductList({ products, cart, onAddToCart }) {
         </div>
       </div>
 
-      {/* Grid */}
+      {/* Grid: Clean minimal cards without long tech specs/descriptions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {products.map(product => {
           const inCartItem = cart.find(c => c.id === product.id);
           return (
             <div 
               key={product.id}
-              className="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden flex flex-col hover:border-slate-700 hover:bg-slate-900/90 transition duration-200 group"
+              className="bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden flex flex-col hover:border-slate-700 hover:bg-slate-900/90 transition duration-200 group shadow-lg"
             >
               {/* Image & Badges */}
               <div className="relative h-48 bg-slate-950 overflow-hidden border-b border-slate-800/80">
@@ -57,7 +53,7 @@ export default function ProductList({ products, cart, onAddToCart }) {
                 </div>
               </div>
 
-              {/* Information */}
+              {/* Information: Clean, simple, professional */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-xs mb-1.5">
@@ -71,15 +67,9 @@ export default function ProductList({ products, cart, onAddToCart }) {
                     </div>
                   </div>
 
-                  <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors">
+                  <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">
                     {product.name}
                   </h3>
-                  <p className="text-xs font-mono text-slate-400 mt-1">
-                    {product.model}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
-                    {product.specs}
-                  </p>
                 </div>
 
                 <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">

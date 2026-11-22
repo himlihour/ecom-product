@@ -1,7 +1,7 @@
 import React from 'react';
 import { IconShoppingBag } from './Icons';
 
-export default function Navbar({ currentStep, setCurrentStep, cartCount, cartTotal }) {
+export default function Navbar({ currentStep, setCurrentStep, cartCount, cartTotal, isCartBumping }) {
   const steps = [
     { id: 'products', num: '01', label: 'CATALOG' },
     { id: 'cart', num: '02', label: `CART (${cartCount})` },
@@ -13,7 +13,7 @@ export default function Navbar({ currentStep, setCurrentStep, cartCount, cartTot
     <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
-        {/* Brand Inspired by API / Developer platforms */}
+        {/* Brand */}
         <div 
           onClick={() => setCurrentStep('products')} 
           className="flex items-center gap-3 cursor-pointer group select-none"
@@ -61,16 +61,22 @@ export default function Navbar({ currentStep, setCurrentStep, cartCount, cartTot
           })}
         </nav>
 
-        {/* Cart Trigger */}
+        {/* Animated Cart Button */}
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setCurrentStep('cart')}
-            className="flex items-center gap-3 px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-850 text-slate-300 transition group"
+            className={`flex items-center gap-3 px-3.5 py-2 rounded-lg bg-slate-900 border transition duration-300 group ${
+              isCartBumping 
+                ? 'scale-110 border-emerald-400 bg-slate-800 shadow-lg shadow-emerald-500/30' 
+                : 'border-slate-800 hover:border-emerald-500/40 text-slate-300'
+            }`}
           >
             <div className="relative">
-              <IconShoppingBag className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 transition" />
+              <IconShoppingBag className={`w-4 h-4 transition ${isCartBumping ? 'text-emerald-400 scale-110' : 'text-slate-400 group-hover:text-emerald-400'}`} />
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-slate-950 font-mono text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className={`absolute -top-1.5 -right-2 bg-emerald-500 text-slate-950 font-mono text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center transition ${
+                  isCartBumping ? 'scale-125 bg-emerald-400' : ''
+                }`}>
                   {cartCount}
                 </span>
               )}

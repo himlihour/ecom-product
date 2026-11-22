@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CODEX.COMMERCE — API Style Hardware Catalog (Preview)</title>
+  <title>CODEX.COMMERCE — API Style Hardware Catalog</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -40,14 +40,14 @@
     }
   </script>
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950 antialiased flex flex-col">
-  <div id="root" class="flex-1 flex flex-col"></div>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950 antialiased flex flex-col relative overflow-x-hidden">
+  <div id="root" class="flex-1 flex flex-col relative z-10"></div>
 
   <!-- React Source Code -->
   <script type="text/babel">
-    const { useState, useMemo } = React;
+    const { useState, useMemo, useEffect, useRef } = React;
 
-    // Professional SVG Icons (NO EMOJIS)
+    // Professional SVG Icons (Zero Emojis)
     const IconShoppingBag = ({ className = "w-5 h-5" }) => (
       <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
         <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -120,58 +120,228 @@
       </svg>
     );
 
+    // Spider Web & Cursor Spotlight & Click Wave Background Component
+    function SpiderWebBackground() {
+      const canvasRef = useRef(null);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const handleResize = () => {
+          width = canvas.width = window.innerWidth;
+          height = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+
+        const mouse = { x: null, y: null, radius: 170 };
+
+        const handleMouseMove = (e) => {
+          mouse.x = e.clientX;
+          mouse.y = e.clientY;
+        };
+        const handleMouseLeave = () => {
+          mouse.x = null;
+          mouse.y = null;
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseleave', handleMouseLeave);
+
+        // Click waves / shockwaves
+        const ripples = [];
+        const handleClick = (e) => {
+          ripples.push({
+            x: e.clientX,
+            y: e.clientY,
+            radius: 0,
+            maxRadius: 230,
+            alpha: 1,
+            speed: 5
+          });
+        };
+        window.addEventListener('click', handleClick);
+
+        // Spiderweb particles
+        const particleCount = Math.min(Math.floor((width * height) / 13000), 80);
+        const particles = [];
+        for (let i = 0; i < particleCount; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.7,
+            vy: (Math.random() - 0.5) * 0.7,
+            radius: Math.random() * 2 + 1,
+            color: Math.random() > 0.4 ? 'rgba(16, 185, 129, ' : 'rgba(148, 163, 184, '
+          });
+        }
+
+        const animate = () => {
+          ctx.clearRect(0, 0, width, height);
+
+          // 1. Mouse Cursor Spotlight Light
+          if (mouse.x !== null && mouse.y !== null) {
+            const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 280);
+            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.09)');
+            gradient.addColorStop(0.5, 'rgba(16, 185, 129, 0.03)');
+            gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(mouse.x, mouse.y, 280, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // 2. Click Shockwave Waves
+          for (let i = ripples.length - 1; i >= 0; i--) {
+            const r = ripples[i];
+            r.radius += r.speed;
+            r.alpha -= 0.02;
+
+            if (r.alpha <= 0 || r.radius >= r.maxRadius) {
+              ripples.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(16, 185, 129, ${r.alpha * 0.8})`;
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = '#10b981';
+            ctx.shadowBlur = 14;
+            ctx.stroke();
+
+            if (r.radius > 20) {
+              ctx.beginPath();
+              ctx.arc(r.x, r.y, r.radius - 16, 0, Math.PI * 2);
+              ctx.strokeStyle = `rgba(52, 211, 153, ${r.alpha * 0.4})`;
+              ctx.lineWidth = 1.2;
+              ctx.stroke();
+            }
+            ctx.restore();
+          }
+
+          // 3. Particles & Spider Web Network
+          for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.x < 0 || p.x > width) p.vx = -p.vx;
+            if (p.y < 0 || p.y > height) p.vy = -p.vy;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p.color + '0.75)';
+            ctx.fill();
+
+            // Connect nearby nodes
+            for (let j = i + 1; j < particles.length; j++) {
+              const p2 = particles[j];
+              const dx = p.x - p2.x;
+              const dy = p.y - p2.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+
+              if (dist < 130) {
+                const alpha = (1 - dist / 130) * 0.22;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = `rgba(16, 185, 129, ${alpha})`;
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+              }
+            }
+
+            // Connect to mouse cursor like a spider web
+            if (mouse.x !== null && mouse.y !== null) {
+              const mdx = p.x - mouse.x;
+              const mdy = p.y - mouse.y;
+              const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+
+              if (mdist < mouse.radius) {
+                const malpha = (1 - mdist / mouse.radius) * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.strokeStyle = `rgba(52, 211, 153, ${malpha})`;
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+              }
+            }
+          }
+
+          animationFrameId = requestAnimationFrame(animate);
+        };
+
+        animate();
+
+        return () => {
+          cancelAnimationFrame(animationFrameId);
+          window.removeEventListener('resize', handleResize);
+          window.removeEventListener('mousemove', handleMouseMove);
+          window.removeEventListener('mouseleave', handleMouseLeave);
+          window.removeEventListener('click', handleClick);
+        };
+      }, []);
+
+      return (
+        <canvas 
+          ref={canvasRef} 
+          className="fixed inset-0 pointer-events-none z-0" 
+          style={{ background: 'transparent' }}
+        />
+      );
+    }
+
     // Core Products Data
     const PRODUCTS = [
       {
         id: 1,
         name: "Laptop",
-        model: "Workstation Pro 15.6\"",
         category: "Hardware",
         sku: "HW-LT-650",
         price: 650.00,
         rating: 4.9,
         reviews: 142,
         image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=700&auto=format&fit=crop&q=80",
-        specs: "Intel Core i7-13700H / 16GB DDR5 / 512GB PCIe 4.0 NVMe / FHD IPS Anti-Glare",
         tag: "High Priority"
       },
       {
         id: 2,
         name: "Mouse",
-        model: "Precision Optical Sensor 4K",
         category: "Peripherals",
         sku: "HW-MS-015",
         price: 15.00,
         rating: 4.7,
         reviews: 89,
         image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=700&auto=format&fit=crop&q=80",
-        specs: "2.4GHz Ultra-Low Latency / 4000 DPI Optical Sensor / Silent Switch Mechanism",
         tag: "Essential"
       },
       {
         id: 3,
         name: "Keyboard",
-        model: "Mechanical Tactical Board",
         category: "Peripherals",
         sku: "HW-KB-025",
         price: 25.00,
         rating: 4.8,
         reviews: 215,
         image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=700&auto=format&fit=crop&q=80",
-        specs: "Custom Blue Mechanical Switches / N-Key Rollover / PBT Double-Shot Keycaps",
         tag: "Developer Choice"
       },
       {
         id: 4,
         name: "Monitor",
-        model: "UltraWide Color Calibrated 27\"",
         category: "Displays",
         sku: "HW-MN-120",
         price: 120.00,
         rating: 4.9,
         reviews: 97,
         image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=700&auto=format&fit=crop&q=80",
-        specs: "4K UHD IPS Panel / 99% sRGB Color Accuracy / HDR10 / USB-C 65W Power Delivery",
         tag: "Reference Display"
       }
     ];
@@ -202,7 +372,7 @@
         { ...PRODUCTS[1], quantity: 2 }
       ]);
       const [completedOrder, setCompletedOrder] = useState(null);
-      const [notification, setNotification] = useState(null);
+      const [isCartBumping, setIsCartBumping] = useState(false);
 
       const [formData, setFormData] = useState({
         firstName: '',
@@ -217,11 +387,6 @@
       });
       const [errors, setErrors] = useState({});
 
-      const notify = (msg) => {
-        setNotification(msg);
-        setTimeout(() => setNotification(null), 3000);
-      };
-
       const handleAddToCart = (product) => {
         setCart(prev => {
           const exists = prev.find(p => p.id === product.id);
@@ -230,7 +395,10 @@
           }
           return [...prev, { ...product, quantity: 1 }];
         });
-        notify(`SKU: ${product.sku} [${product.name}] added to cart ledger.`);
+
+        // Trigger Cart Box Animation
+        setIsCartBumping(true);
+        setTimeout(() => setIsCartBumping(false), 500);
       };
 
       const handleUpdateQty = (id, delta) => {
@@ -244,9 +412,7 @@
       };
 
       const handleRemoveItem = (id) => {
-        const item = cart.find(i => i.id === id);
         setCart(prev => prev.filter(i => i.id !== id));
-        if (item) notify(`Item [${item.name}] removed from cart ledger.`);
       };
 
       const subtotal = useMemo(() => cart.reduce((sum, i) => sum + (i.price * i.quantity), 0), [cart]);
@@ -273,14 +439,10 @@
 
         if (Object.keys(errs).length > 0) {
           setErrors(errs);
-          notify("Validation failed: Please complete all required fields.");
           return;
         }
 
-        if (cart.length === 0) {
-          notify("Cart ledger is empty.");
-          return;
-        }
+        if (cart.length === 0) return;
 
         const newOrder = {
           orderId: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -316,16 +478,12 @@
       ];
 
       return (
-        <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans">
-          {/* Notification */}
-          {notification && (
-            <div className="fixed bottom-6 right-6 z-50 bg-slate-900 border border-emerald-500/50 text-emerald-400 px-4 py-2.5 rounded-lg shadow-xl text-xs font-mono flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              <span>{notification}</span>
-            </div>
-          )}
+        <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans relative">
+          
+          {/* Interactive Spider Web & Mouse Follow Light & Wave Background */}
+          <SpiderWebBackground />
 
-          {/* Navigation */}
+          {/* Navigation with Animated Cart */}
           <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
               <div 
@@ -375,15 +533,21 @@
                 })}
               </nav>
 
-              {/* Cart Button */}
+              {/* Cart Box with Dynamic Animation */}
               <button 
                 onClick={() => setCurrentStep('cart')}
-                className="flex items-center gap-3 px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/40 text-slate-300 transition"
+                className={`flex items-center gap-3 px-3.5 py-2 rounded-lg bg-slate-900 border transition duration-300 ${
+                  isCartBumping 
+                    ? 'scale-110 border-emerald-400 bg-slate-800 shadow-lg shadow-emerald-500/30' 
+                    : 'border-slate-800 hover:border-emerald-500/40 text-slate-300'
+                }`}
               >
                 <div className="relative">
-                  <IconShoppingBag className="w-4 h-4 text-slate-400" />
+                  <IconShoppingBag className={`w-4 h-4 transition ${isCartBumping ? 'text-emerald-400 scale-110' : 'text-slate-400'}`} />
                   {cartCount > 0 && (
-                    <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-slate-950 font-mono text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    <span className={`absolute -top-1.5 -right-2 bg-emerald-500 text-slate-950 font-mono text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center transition ${
+                      isCartBumping ? 'scale-125 bg-emerald-400' : ''
+                    }`}>
                       {cartCount}
                     </span>
                   )}
@@ -395,18 +559,14 @@
             </div>
           </header>
 
-          {/* Main Views */}
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+          {/* Main Content */}
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 relative z-10">
             
-            {/* 1. Products */}
+            {/* 1. Products View */}
             {currentStep === 'products' && (
               <div className="space-y-8">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      <span>SPECIFICATION REPOSITORY / PRACTICAL EXERCISE 1</span>
-                    </div>
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
                       Hardware Inventory Catalog
                     </h1>
@@ -431,7 +591,7 @@
                     return (
                       <div 
                         key={product.id}
-                        className="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden flex flex-col hover:border-slate-700 hover:bg-slate-900/90 transition duration-200 group"
+                        className="bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-xl overflow-hidden flex flex-col hover:border-slate-700 hover:bg-slate-900/90 transition duration-200 group shadow-lg"
                       >
                         <div className="relative h-48 bg-slate-950 overflow-hidden border-b border-slate-800/80">
                           <img 
@@ -464,15 +624,9 @@
                               </div>
                             </div>
 
-                            <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors">
+                            <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">
                               {product.name}
                             </h3>
-                            <p className="text-xs font-mono text-slate-400 mt-1">
-                              {product.model}
-                            </p>
-                            <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
-                              {product.specs}
-                            </p>
                           </div>
 
                           <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
@@ -504,14 +658,11 @@
               </div>
             )}
 
-            {/* 2. Cart */}
+            {/* 2. Cart View */}
             {currentStep === 'cart' && (
               <div className="space-y-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400 text-xs font-mono mb-2">
-                      <span>PRACTICAL EXERCISE 1 / SHOPPING CART</span>
-                    </div>
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
                       Shopping Cart Ledger
                     </h1>
@@ -557,7 +708,7 @@
                       {cart.map(item => (
                         <div 
                           key={item.id}
-                          className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex flex-col sm:grid sm:grid-cols-12 items-center gap-4 hover:border-slate-700 transition"
+                          className="bg-slate-900/60 backdrop-blur-sm border border-slate-800/80 rounded-xl p-4 flex flex-col sm:grid sm:grid-cols-12 items-center gap-4 hover:border-slate-700 transition"
                         >
                           <div className="col-span-6 flex items-center gap-3.5 w-full">
                             <img 
@@ -571,7 +722,7 @@
                                   {item.sku}
                                 </span>
                               </div>
-                              <h4 className="text-sm font-bold text-white mt-1">{item.name}</h4>
+                              <h4 className="text-base font-bold text-white mt-1">{item.name}</h4>
                               <p className="text-xs font-mono text-slate-400">${item.price.toFixed(2)} / unit</p>
                             </div>
                           </div>
@@ -617,7 +768,7 @@
                     </div>
 
                     <div className="lg:col-span-1">
-                      <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-5 space-y-5 sticky top-24">
+                      <div className="bg-slate-900/70 backdrop-blur-sm border border-slate-800 rounded-xl p-5 space-y-5 sticky top-24">
                         <div className="border-b border-slate-800 pb-3">
                           <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">FINANCIAL OVERVIEW</span>
                           <h3 className="text-base font-bold text-white font-sans">Summary Breakdown</h3>
@@ -661,14 +812,11 @@
               </div>
             )}
 
-            {/* 3. Checkout */}
+            {/* 3. Checkout View */}
             {currentStep === 'checkout' && (
               <div className="space-y-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400 text-xs font-mono mb-2">
-                      <span>PRACTICAL EXERCISE 2 / CHECKOUT FORM & VALIDATION</span>
-                    </div>
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
                       Customer Checkout Verification
                     </h1>
@@ -688,8 +836,7 @@
 
                 <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2 space-y-6">
-                    {/* Credentials */}
-                    <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-6 space-y-5">
+                    <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-800/80 rounded-xl p-6 space-y-5">
                       <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                         <div className="flex items-center gap-2.5">
                           <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
@@ -769,8 +916,7 @@
                       </div>
                     </div>
 
-                    {/* Address */}
-                    <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-6 space-y-5">
+                    <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-800/80 rounded-xl p-6 space-y-5">
                       <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                         <div className="flex items-center gap-2.5">
                           <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
@@ -851,8 +997,7 @@
                       </div>
                     </div>
 
-                    {/* Logistics */}
-                    <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-6 space-y-4">
+                    <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-800/80 rounded-xl p-6 space-y-4">
                       <div className="flex items-center gap-2.5 border-b border-slate-800/80 pb-3">
                         <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
                           03
@@ -898,9 +1043,8 @@
                     </div>
                   </div>
 
-                  {/* Summary */}
                   <div className="lg:col-span-1">
-                    <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-5 space-y-5 sticky top-24">
+                    <div className="bg-slate-900/70 backdrop-blur-sm border border-slate-800 rounded-xl p-5 space-y-5 sticky top-24">
                       <div className="border-b border-slate-800 pb-3">
                         <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">ALLOCATION SUMMARY</span>
                         <h3 className="text-base font-bold text-white font-sans">Order Ledger</h3>
@@ -955,18 +1099,15 @@
               </div>
             )}
 
-            {/* 4. Confirmation */}
+            {/* 4. Confirmation View */}
             {currentStep === 'confirmation' && completedOrder && (
               <div className="max-w-3xl mx-auto space-y-8">
-                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center space-y-4">
+                <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl p-8 text-center space-y-4">
                   <div className="w-14 h-14 mx-auto rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
                     <IconCheck className="w-7 h-7" />
                   </div>
 
                   <div>
-                    <span className="font-mono text-xs px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
-                      STATUS CODE: 200 OK / PROCESSED
-                    </span>
                     <h1 className="text-2xl sm:text-3xl font-bold text-white font-sans mt-3">
                       Order Placed Successfully!
                     </h1>
@@ -998,7 +1139,7 @@
                   </div>
                 </div>
 
-                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6">
+                <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6">
                   <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                     <div className="flex items-center gap-2">
                       <IconPackage className="w-4 h-4 text-emerald-400" />
@@ -1082,13 +1223,13 @@
           </main>
 
           {/* Footer */}
-          <footer className="border-t border-slate-900 bg-slate-950 py-8 text-xs font-mono text-slate-500">
+          <footer className="border-t border-slate-900 bg-slate-950/80 backdrop-blur-sm py-8 text-xs font-mono text-slate-500 relative z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-emerald-400 font-bold">CODEX.COMMERCE</span>
                 <span>/ API-GRADE PRODUCT SYSTEM</span>
               </div>
-              <p className="text-slate-600">Enterprise Practical Exercise Architecture</p>
+              <p className="text-slate-600">Procurement & Fulfillment Architecture</p>
             </div>
           </footer>
         </div>

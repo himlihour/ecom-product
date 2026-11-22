@@ -58,9 +58,6 @@ export default function Checkout({ cart, onPlaceOrder, onBackToCart }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400 text-xs font-mono mb-2">
-            <span>PRACTICAL EXERCISE 2 / CHECKOUT FORM & VALIDATION</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
             Customer Checkout Verification
           </h1>

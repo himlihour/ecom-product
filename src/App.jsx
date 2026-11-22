@@ -4,24 +4,19 @@ import ProductList from './components/ProductList';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import OrderConfirmation from './components/OrderConfirmation';
+import SpiderWebBackground from './components/SpiderWebBackground';
 import { PRODUCTS } from './data/products';
 
 export default function App() {
-  const [currentStep, setCurrentStep] = useState('products'); // 'products' | 'cart' | 'checkout' | 'confirmation'
+  const [currentStep, setCurrentStep] = useState('products');
   
-  // Initial cart with Laptop (1) and Mouse (2)
   const [cart, setCart] = useState([
     { ...PRODUCTS[0], quantity: 1 },
     { ...PRODUCTS[1], quantity: 2 }
   ]);
 
   const [completedOrder, setCompletedOrder] = useState(null);
-  const [notification, setNotification] = useState(null);
-
-  const notify = (msg) => {
-    setNotification(msg);
-    setTimeout(() => setNotification(null), 3000);
-  };
+  const [isCartBumping, setIsCartBumping] = useState(false);
 
   const handleAddToCart = (product) => {
     setCart(prevCart => {
@@ -33,7 +28,10 @@ export default function App() {
       }
       return [...prevCart, { ...product, quantity: 1 }];
     });
-    notify(`SKU: ${product.sku} [${product.name}] added to cart ledger.`);
+
+    // Trigger Cart Box Animation
+    setIsCartBumping(true);
+    setTimeout(() => setIsCartBumping(false), 500);
   };
 
   const handleUpdateQty = (productId, delta) => {
@@ -49,11 +47,7 @@ export default function App() {
   };
 
   const handleRemoveItem = (productId) => {
-    const item = cart.find(i => i.id === productId);
     setCart(prevCart => prevCart.filter(item => item.id !== productId));
-    if (item) {
-      notify(`Item [${item.name}] removed from cart ledger.`);
-    }
   };
 
   const handlePlaceOrder = (orderData) => {
@@ -92,26 +86,22 @@ export default function App() {
   }, [cart]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950 antialiased">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950 antialiased relative">
       
-      {/* Toast Notification */}
-      {notification && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 border border-emerald-500/50 text-emerald-400 px-4 py-2.5 rounded-lg shadow-xl text-xs font-mono flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span>{notification}</span>
-        </div>
-      )}
+      {/* Spider Web & Light Cursor Wave Background */}
+      <SpiderWebBackground />
 
-      {/* Navbar */}
+      {/* Navbar with Cart Bump Animation */}
       <Navbar 
         currentStep={currentStep} 
         setCurrentStep={setCurrentStep} 
         cartCount={cartCount} 
-        cartTotal={cartTotal} 
+        cartTotal={cartTotal}
+        isCartBumping={isCartBumping}
       />
 
       {/* Body Views */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 relative z-10">
         {currentStep === 'products' && (
           <ProductList 
             products={PRODUCTS} 
@@ -150,13 +140,13 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-8 text-xs font-mono text-slate-500">
+      <footer className="border-t border-slate-900 bg-slate-950/80 backdrop-blur-sm py-8 text-xs font-mono text-slate-500 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="text-emerald-400 font-bold">CODEX.COMMERCE</span>
             <span>/ API-GRADE PRODUCT SYSTEM</span>
           </div>
-          <p className="text-slate-600">Enterprise Practical Exercise Architecture</p>
+          <p className="text-slate-600">Procurement & Fulfillment Architecture</p>
         </div>
       </footer>
     </div>
