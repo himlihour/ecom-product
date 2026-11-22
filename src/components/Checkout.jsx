@@ -61,9 +61,6 @@ export default function Checkout({ cart, onPlaceOrder, onBackToCart }) {
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
             Customer Checkout Verification
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Provide delivery coordinates and select freight routing options.
-          </p>
         </div>
 
         <button 

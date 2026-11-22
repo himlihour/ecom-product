@@ -13,9 +13,6 @@ export default function Cart({ cart, onUpdateQty, onRemoveItem, onProceedToCheck
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
             Shopping Cart Ledger
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Review allocated equipment, update quantity counters, and verify itemized values.
-          </p>
         </div>
 
         <button 

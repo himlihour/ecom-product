@@ -30,7 +30,6 @@ export default function Navbar({ currentStep, setCurrentStep, cartCount, cartTot
                 PROD v1.0
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-sans hidden sm:block">Hardware Procurement & Fulfillment</p>
           </div>
         </div>
 

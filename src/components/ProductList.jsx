@@ -4,25 +4,11 @@ import { IconStar, IconPlus } from './Icons';
 export default function ProductList({ products, cart, onAddToCart }) {
   return (
     <div className="space-y-8 relative z-10 select-none">
-      {/* Header Banner without unwanted tags */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
-            Hardware Inventory Catalog
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Enterprise grade developer workstations and peripheral devices.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-          <span className="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded">
-            TOTAL UNITS: <strong className="text-white">{products.length}</strong>
-          </span>
-          <span className="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded text-emerald-400">
-            AVAILABILITY: IN_STOCK
-          </span>
-        </div>
+      {/* Header Banner */}
+      <div className="border-b border-slate-800/80 pb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
+          Hardware
+        </h1>
       </div>
 
       {/* Grid: Clean minimal cards without long tech specs/descriptions */}
@@ -74,7 +60,6 @@ export default function ProductList({ products, cart, onAddToCart }) {
 
                 <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono block">UNIT PRICE</span>
                     <span className="text-xl font-bold font-mono text-white">
                       ${product.price.toFixed(2)}
                     </span>
