@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CODEX.COMMERCE — API Style Hardware Catalog (Preview)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM (React 18) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  
+  <!-- Babel Standalone for JSX compilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            slate: {
+              850: '#151d2f',
+              950: '#030712',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-950 antialiased flex flex-col">
+  <div id="root" class="flex-1 flex flex-col"></div>
+
+  <!-- React Source Code -->
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    // Professional SVG Icons (NO EMOJIS)
+    const IconShoppingBag = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+    );
+
+    const IconTrash = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+    );
+
+    const IconCheck = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+    );
+
+    const IconArrowRight = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+      </svg>
+    );
+
+    const IconArrowLeft = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+    );
+
+    const IconPlus = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+    );
+
+    const IconMinus = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
+      </svg>
+    );
+
+    const IconStar = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+    );
+
+    const IconShield = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    );
+
+    const IconPrinter = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+      </svg>
+    );
+
+    const IconPackage = ({ className = "w-5 h-5" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    );
+
+    const IconAlert = ({ className = "w-4 h-4" }) => (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    );
+
+    // Core Products Data
+    const PRODUCTS = [
+      {
+        id: 1,
+        name: "Laptop",
+        model: "Workstation Pro 15.6\"",
+        category: "Hardware",
+        sku: "HW-LT-650",
+        price: 650.00,
+        rating: 4.9,
+        reviews: 142,
+        image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=700&auto=format&fit=crop&q=80",
+        specs: "Intel Core i7-13700H / 16GB DDR5 / 512GB PCIe 4.0 NVMe / FHD IPS Anti-Glare",
+        tag: "High Priority"
+      },
+      {
+        id: 2,
+        name: "Mouse",
+        model: "Precision Optical Sensor 4K",
+        category: "Peripherals",
+        sku: "HW-MS-015",
+        price: 15.00,
+        rating: 4.7,
+        reviews: 89,
+        image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=700&auto=format&fit=crop&q=80",
+        specs: "2.4GHz Ultra-Low Latency / 4000 DPI Optical Sensor / Silent Switch Mechanism",
+        tag: "Essential"
+      },
+      {
+        id: 3,
+        name: "Keyboard",
+        model: "Mechanical Tactical Board",
+        category: "Peripherals",
+        sku: "HW-KB-025",
+        price: 25.00,
+        rating: 4.8,
+        reviews: 215,
+        image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=700&auto=format&fit=crop&q=80",
+        specs: "Custom Blue Mechanical Switches / N-Key Rollover / PBT Double-Shot Keycaps",
+        tag: "Developer Choice"
+      },
+      {
+        id: 4,
+        name: "Monitor",
+        model: "UltraWide Color Calibrated 27\"",
+        category: "Displays",
+        sku: "HW-MN-120",
+        price: 120.00,
+        rating: 4.9,
+        reviews: 97,
+        image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=700&auto=format&fit=crop&q=80",
+        specs: "4K UHD IPS Panel / 99% sRGB Color Accuracy / HDR10 / USB-C 65W Power Delivery",
+        tag: "Reference Display"
+      }
+    ];
+
+    const SHIPPING_METHODS = [
+      { 
+        id: 'free', 
+        name: 'Standard Ground Delivery', 
+        price: 0.00, 
+        duration: '7 - 20 Business Days', 
+        carrier: 'Postal Freight Network',
+        desc: 'Fully tracked standard shipment with delivery confirmation.' 
+      },
+      { 
+        id: 'express', 
+        name: 'Priority Express Delivery', 
+        price: 9.00, 
+        duration: '1 - 3 Business Days', 
+        carrier: 'Global Air Cargo',
+        desc: 'Guaranteed rapid air courier with real-time checkpoint telemetry.' 
+      }
+    ];
+
+    function App() {
+      const [currentStep, setCurrentStep] = useState('products');
+      const [cart, setCart] = useState([
+        { ...PRODUCTS[0], quantity: 1 },
+        { ...PRODUCTS[1], quantity: 2 }
+      ]);
+      const [completedOrder, setCompletedOrder] = useState(null);
+      const [notification, setNotification] = useState(null);
+
+      const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        shippingMethod: 'free'
+      });
+      const [errors, setErrors] = useState({});
+
+      const notify = (msg) => {
+        setNotification(msg);
+        setTimeout(() => setNotification(null), 3000);
+      };
+
+      const handleAddToCart = (product) => {
+        setCart(prev => {
+          const exists = prev.find(p => p.id === product.id);
+          if (exists) {
+            return prev.map(p => p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p);
+          }
+          return [...prev, { ...product, quantity: 1 }];
+        });
+        notify(`SKU: ${product.sku} [${product.name}] added to cart ledger.`);
+      };
+
+      const handleUpdateQty = (id, delta) => {
+        setCart(prev => prev.map(p => {
+          if (p.id === id) {
+            const next = p.quantity + delta;
+            return next > 0 ? { ...p, quantity: next } : null;
+          }
+          return p;
+        }).filter(Boolean));
+      };
+
+      const handleRemoveItem = (id) => {
+        const item = cart.find(i => i.id === id);
+        setCart(prev => prev.filter(i => i.id !== id));
+        if (item) notify(`Item [${item.name}] removed from cart ledger.`);
+      };
+
+      const subtotal = useMemo(() => cart.reduce((sum, i) => sum + (i.price * i.quantity), 0), [cart]);
+      const selectedShipping = SHIPPING_METHODS.find(m => m.id === formData.shippingMethod) || SHIPPING_METHODS[0];
+      const shippingCost = selectedShipping.price;
+      const grandTotal = subtotal + shippingCost;
+      const cartCount = useMemo(() => cart.reduce((sum, i) => sum + i.quantity, 0), [cart]);
+
+      const handlePlaceOrder = (e) => {
+        e.preventDefault();
+        const errs = {};
+        if (!formData.firstName.trim()) errs.firstName = "First name is required";
+        if (!formData.lastName.trim()) errs.lastName = "Last name is required";
+        if (!formData.email.trim()) {
+          errs.email = "Email address is required";
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+          errs.email = "Invalid email formatting";
+        }
+        if (!formData.phone.trim()) errs.phone = "Phone number is required";
+        if (!formData.street.trim()) errs.street = "Street address is required";
+        if (!formData.city.trim()) errs.city = "City is required";
+        if (!formData.state.trim()) errs.state = "State / Province is required";
+        if (!formData.zipCode.trim()) errs.zipCode = "Zip code is required";
+
+        if (Object.keys(errs).length > 0) {
+          setErrors(errs);
+          notify("Validation failed: Please complete all required fields.");
+          return;
+        }
+
+        if (cart.length === 0) {
+          notify("Cart ledger is empty.");
+          return;
+        }
+
+        const newOrder = {
+          orderId: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+          customerName: `${formData.firstName} ${formData.lastName}`,
+          customerEmail: formData.email,
+          customerPhone: formData.phone,
+          customerAddress: `${formData.street}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
+          orderDate: new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          products: [...cart],
+          subtotal,
+          shippingCost,
+          shippingMethodName: selectedShipping.name,
+          grandTotal,
+          status: "Pending"
+        };
+
+        setCompletedOrder(newOrder);
+        setCart([]);
+        setCurrentStep('confirmation');
+      };
+
+      const steps = [
+        { id: 'products', num: '01', label: 'CATALOG' },
+        { id: 'cart', num: '02', label: `CART (${cartCount})` },
+        { id: 'checkout', num: '03', label: 'CHECKOUT' },
+        { id: 'confirmation', num: '04', label: 'CONFIRMATION' },
+      ];
+
+      return (
+        <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans">
+          {/* Notification */}
+          {notification && (
+            <div className="fixed bottom-6 right-6 z-50 bg-slate-900 border border-emerald-500/50 text-emerald-400 px-4 py-2.5 rounded-lg shadow-xl text-xs font-mono flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>{notification}</span>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+              <div 
+                onClick={() => setCurrentStep('products')} 
+                className="flex items-center gap-3 cursor-pointer group select-none"
+              >
+                <div className="h-9 w-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/20 group-hover:border-emerald-500/50 transition">
+                  <span className="font-mono text-sm font-bold tracking-tighter">&gt;_</span>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-bold tracking-tight text-white font-mono">
+                      CODEX<span className="text-emerald-400">.COMMERCE</span>
+                    </span>
+                    <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      PROD v1.0
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-sans hidden sm:block">Hardware Procurement & Fulfillment</p>
+                </div>
+              </div>
+
+              {/* Stepper */}
+              <nav className="hidden md:flex items-center gap-1 bg-slate-900/90 border border-slate-800/80 px-2 py-1 rounded-lg">
+                {steps.map((s, idx) => {
+                  const isActive = currentStep === s.id;
+                  const isClickable = s.id === 'products' || (s.id === 'cart' && cartCount >= 0) || (s.id === 'checkout' && cartCount > 0);
+                  return (
+                    <React.Fragment key={s.id}>
+                      {idx > 0 && <span className="text-slate-700 text-xs px-1">/</span>}
+                      <button
+                        onClick={() => isClickable && setCurrentStep(s.id)}
+                        disabled={!isClickable}
+                        className={`flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 rounded transition ${
+                          isActive
+                            ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                            : isClickable
+                            ? 'text-slate-400 hover:text-slate-200'
+                            : 'text-slate-600 cursor-not-allowed'
+                        }`}
+                      >
+                        <span className={isActive ? 'text-slate-950 font-bold' : 'text-slate-500'}>{s.num}</span>
+                        <span>{s.label}</span>
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
+              </nav>
+
+              {/* Cart Button */}
+              <button 
+                onClick={() => setCurrentStep('cart')}
+                className="flex items-center gap-3 px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-emerald-500/40 text-slate-300 transition"
+              >
+                <div className="relative">
+                  <IconShoppingBag className="w-4 h-4 text-slate-400" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-slate-950 font-mono text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs font-mono text-slate-300 font-semibold hidden sm:inline">
+                  ${subtotal.toFixed(2)}
+                </span>
+              </button>
+            </div>
+          </header>
+
+          {/* Main Views */}
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+            
+            {/* 1. Products */}
+            {currentStep === 'products' && (
+              <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>SPECIFICATION REPOSITORY / PRACTICAL EXERCISE 1</span>
+                    </div>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
+                      Hardware Inventory Catalog
+                    </h1>
+                    <p className="text-sm text-slate-400 mt-1">
+                      Enterprise grade developer workstations and peripheral devices.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+                    <span className="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded">
+                      TOTAL UNITS: <strong className="text-white">{PRODUCTS.length}</strong>
+                    </span>
+                    <span className="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded text-emerald-400">
+                      AVAILABILITY: IN_STOCK
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {PRODUCTS.map(product => {
+                    const inCartItem = cart.find(c => c.id === product.id);
+                    return (
+                      <div 
+                        key={product.id}
+                        className="bg-slate-900/60 border border-slate-800 rounded-xl overflow-hidden flex flex-col hover:border-slate-700 hover:bg-slate-900/90 transition duration-200 group"
+                      >
+                        <div className="relative h-48 bg-slate-950 overflow-hidden border-b border-slate-800/80">
+                          <img 
+                            src={product.image} 
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-85 group-hover:opacity-100"
+                          />
+                          <div className="absolute top-3 left-3 flex gap-2">
+                            <span className="bg-slate-950/90 border border-slate-800 text-slate-300 font-mono text-[10px] px-2 py-0.5 rounded">
+                              {product.sku}
+                            </span>
+                          </div>
+                          <div className="absolute top-3 right-3">
+                            <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-semibold px-2 py-0.5 rounded">
+                              {product.tag}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                          <div>
+                            <div className="flex items-center justify-between text-xs mb-1.5">
+                              <span className="font-mono text-slate-400 text-[11px] uppercase tracking-wider">
+                                {product.category}
+                              </span>
+                              <div className="flex items-center gap-1 text-slate-400 font-mono text-xs">
+                                <IconStar className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>{product.rating}</span>
+                                <span className="text-slate-600">({product.reviews})</span>
+                              </div>
+                            </div>
+
+                            <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors">
+                              {product.name}
+                            </h3>
+                            <p className="text-xs font-mono text-slate-400 mt-1">
+                              {product.model}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                              {product.specs}
+                            </p>
+                          </div>
+
+                          <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                            <div>
+                              <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono block">UNIT PRICE</span>
+                              <span className="text-xl font-bold font-mono text-white">
+                                ${product.price.toFixed(2)}
+                              </span>
+                            </div>
+
+                            <button 
+                              onClick={() => handleAddToCart(product)}
+                              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-mono text-xs font-bold transition shadow-sm"
+                            >
+                              <IconPlus className="w-3.5 h-3.5" />
+                              <span>ADD TO CART</span>
+                              {inCartItem && (
+                                <span className="ml-1 px-1.5 py-0.2 rounded bg-slate-950 text-emerald-400 text-[10px] font-mono">
+                                  {inCartItem.quantity}
+                                </span>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 2. Cart */}
+            {currentStep === 'cart' && (
+              <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400 text-xs font-mono mb-2">
+                      <span>PRACTICAL EXERCISE 1 / SHOPPING CART</span>
+                    </div>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
+                      Shopping Cart Ledger
+                    </h1>
+                    <p className="text-sm text-slate-400 mt-1">
+                      Review allocated equipment, update quantity counters, and verify itemized values.
+                    </p>
+                  </div>
+
+                  <button 
+                    onClick={() => setCurrentStep('products')}
+                    className="inline-flex items-center gap-2 text-xs font-mono text-emerald-400 hover:text-emerald-300 transition"
+                  >
+                    <IconArrowLeft className="w-3.5 h-3.5" />
+                    <span>RETURN TO INVENTORY</span>
+                  </button>
+                </div>
+
+                {cart.length === 0 ? (
+                  <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-16 text-center space-y-4">
+                    <div className="w-12 h-12 mx-auto rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center font-mono text-slate-400">
+                      [NULL]
+                    </div>
+                    <h3 className="text-lg font-bold text-white font-mono">CART IS EMPTY</h3>
+                    <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                      No items have been assigned to your procurement session. Select items from the catalog.
+                    </p>
+                    <button 
+                      onClick={() => setCurrentStep('products')}
+                      className="mt-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono text-xs font-bold transition"
+                    >
+                      VIEW PRODUCTS
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-3">
+                      <div className="hidden sm:grid grid-cols-12 text-[11px] font-mono uppercase tracking-wider text-slate-500 px-4 py-2 border-b border-slate-800/80">
+                        <span className="col-span-6">ITEM / SPECIFICATION</span>
+                        <span className="col-span-3 text-center">QUANTITY</span>
+                        <span className="col-span-3 text-right">TOTAL PRICE</span>
+                      </div>
+
+                      {cart.map(item => (
+                        <div 
+                          key={item.id}
+                          className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex flex-col sm:grid sm:grid-cols-12 items-center gap-4 hover:border-slate-700 transition"
+                        >
+                          <div className="col-span-6 flex items-center gap-3.5 w-full">
+                            <img 
+                              src={item.image} 
+                              alt={item.name} 
+                              className="w-16 h-16 rounded-lg object-cover bg-slate-950 border border-slate-800 shrink-0"
+                            />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-[10px] text-emerald-400 px-1.5 py-0.2 bg-emerald-500/10 border border-emerald-500/20 rounded">
+                                  {item.sku}
+                                </span>
+                              </div>
+                              <h4 className="text-sm font-bold text-white mt-1">{item.name}</h4>
+                              <p className="text-xs font-mono text-slate-400">${item.price.toFixed(2)} / unit</p>
+                            </div>
+                          </div>
+
+                          <div className="col-span-3 flex items-center justify-center gap-2 w-full sm:w-auto">
+                            <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5">
+                              <button 
+                                onClick={() => handleUpdateQty(item.id, -1)}
+                                className="w-7 h-7 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center transition"
+                              >
+                                <IconMinus className="w-3 h-3" />
+                              </button>
+                              <span className="w-9 text-center font-mono text-xs font-bold text-white">
+                                {item.quantity}
+                              </span>
+                              <button 
+                                onClick={() => handleUpdateQty(item.id, 1)}
+                                className="w-7 h-7 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center transition"
+                              >
+                                <IconPlus className="w-3 h-3" />
+                              </button>
+                            </div>
+
+                            <button 
+                              onClick={() => handleRemoveItem(item.id)}
+                              className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition"
+                              title="Remove item"
+                            >
+                              <IconTrash className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="col-span-3 text-right w-full sm:w-auto">
+                            <span className="text-sm font-mono font-bold text-white">
+                              ${(item.price * item.quantity).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="lg:col-span-1">
+                      <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-5 space-y-5 sticky top-24">
+                        <div className="border-b border-slate-800 pb-3">
+                          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">FINANCIAL OVERVIEW</span>
+                          <h3 className="text-base font-bold text-white font-sans">Summary Breakdown</h3>
+                        </div>
+
+                        <div className="space-y-3 text-xs font-mono">
+                          <div className="flex justify-between text-slate-400">
+                            <span>UNITS SELECTED</span>
+                            <span className="text-white font-bold">{cartCount} items</span>
+                          </div>
+                          <div className="flex justify-between text-slate-400">
+                            <span>SUBTOTAL</span>
+                            <span className="text-white font-bold">${subtotal.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-slate-400">
+                            <span>SHIPPING ESTIMATE</span>
+                            <span className="text-emerald-400">Calculated at Checkout</span>
+                          </div>
+                          <div className="border-t border-slate-800/80 pt-3 flex justify-between items-baseline">
+                            <div>
+                              <span className="text-sm font-bold text-white font-sans block">ESTIMATED TOTAL</span>
+                              <span className="text-[10px] text-slate-500 font-sans">Applicable taxes included</span>
+                            </div>
+                            <span className="text-xl font-bold font-mono text-emerald-400">
+                              ${subtotal.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button 
+                          onClick={() => setCurrentStep('checkout')}
+                          className="w-full py-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-slate-950 font-mono font-bold text-xs flex items-center justify-center gap-2 transition"
+                        >
+                          <span>PROCEED TO CHECKOUT</span>
+                          <IconArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 3. Checkout */}
+            {currentStep === 'checkout' && (
+              <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400 text-xs font-mono mb-2">
+                      <span>PRACTICAL EXERCISE 2 / CHECKOUT FORM & VALIDATION</span>
+                    </div>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
+                      Customer Checkout Verification
+                    </h1>
+                    <p className="text-sm text-slate-400 mt-1">
+                      Provide delivery coordinates and select freight routing options.
+                    </p>
+                  </div>
+
+                  <button 
+                    onClick={() => setCurrentStep('cart')}
+                    className="inline-flex items-center gap-2 text-xs font-mono text-emerald-400 hover:text-emerald-300 transition"
+                  >
+                    <IconArrowLeft className="w-3.5 h-3.5" />
+                    <span>RETURN TO CART</span>
+                  </button>
+                </div>
+
+                <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2 space-y-6">
+                    {/* Credentials */}
+                    <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-6 space-y-5">
+                      <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                            01
+                          </span>
+                          <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">
+                            Customer Credentials
+                          </h3>
+                        </div>
+                        <span className="text-[11px] font-mono text-slate-500">* Required Fields</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">First Name *</label>
+                          <input 
+                            type="text"
+                            placeholder="e.g. Alex"
+                            value={formData.firstName}
+                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                            className={`w-full bg-slate-950 border ${errors.firstName ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-800'} rounded-lg px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition`}
+                          />
+                          {errors.firstName && (
+                            <span className="flex items-center gap-1 text-[11px] text-rose-400 mt-1 font-mono">
+                              <IconAlert className="w-3 h-3" /> {errors.firstName}
+                            </span>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">Last Name *</label>
+                          <input 
+                            type="text"
+                            placeholder="e.g. Mercer"
+                            value={formData.lastName}
+                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                            className={`w-full bg-slate-950 border ${errors.lastName ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-800'} rounded-lg px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition`}
+                          />
+                          {errors.lastName && (
+                            <span className="flex items-center gap-1 text-[11px] text-rose-400 mt-1 font-mono">
+                              <IconAlert className="w-3 h-3" /> {errors.lastName}
+                            </span>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">Email Address *</label>
+                          <input 
+                            type="email"
+                            placeholder="developer@domain.com"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className={`w-full bg-slate-950 border ${errors.email ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-800'} rounded-lg px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition`}
+                          />
+                          {errors.email && (
+                            <span className="flex items-center gap-1 text-[11px] text-rose-400 mt-1 font-mono">
+                              <IconAlert className="w-3 h-3" /> {errors.email}
+                            </span>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">Phone Number *</label>
+                          <input 
+                            type="tel"
+                            placeholder="+855 12 345 678"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            className={`w-full bg-slate-950 border ${errors.phone ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-800'} rounded-lg px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition`}
+                          />
+                          {errors.phone && (
+                            <span className="flex items-center gap-1 text-[11px] text-rose-400 mt-1 font-mono">
+                              <IconAlert className="w-3 h-3" /> {errors.phone}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Address */}
+                    <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-6 space-y-5">
+                      <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                            02
+                          </span>
+                          <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">
+                            Physical Address Coordinates
+                          </h3>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">Street Address / Facility No. *</label>
+                          <input 
+                            type="text"
+                            placeholder="Building 4, Russian Confederation Blvd"
+                            value={formData.street}
+                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                            className={`w-full bg-slate-950 border ${errors.street ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-800'} rounded-lg px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition`}
+                          />
+                          {errors.street && (
+                            <span className="flex items-center gap-1 text-[11px] text-rose-400 mt-1 font-mono">
+                              <IconAlert className="w-3 h-3" /> {errors.street}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">City / Municipality *</label>
+                            <input 
+                              type="text"
+                              placeholder="Phnom Penh"
+                              value={formData.city}
+                              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                              className={`w-full bg-slate-950 border ${errors.city ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-800'} rounded-lg px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition`}
+                            />
+                            {errors.city && (
+                              <span className="flex items-center gap-1 text-[11px] text-rose-400 mt-1 font-mono">
+                                <IconAlert className="w-3 h-3" /> {errors.city}
+                              </span>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">State / Province *</label>
+                            <input 
+                              type="text"
+                              placeholder="Phnom Penh"
+                              value={formData.state}
+                              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                              className={`w-full bg-slate-950 border ${errors.state ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-800'} rounded-lg px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition`}
+                            />
+                            {errors.state && (
+                              <span className="flex items-center gap-1 text-[11px] text-rose-400 mt-1 font-mono">
+                                <IconAlert className="w-3 h-3" /> {errors.state}
+                              </span>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">Postal / Zip Code *</label>
+                            <input 
+                              type="text"
+                              placeholder="12000"
+                              value={formData.zipCode}
+                              onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                              className={`w-full bg-slate-950 border ${errors.zipCode ? 'border-rose-500 ring-1 ring-rose-500' : 'border-slate-800'} rounded-lg px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition`}
+                            />
+                            {errors.zipCode && (
+                              <span className="flex items-center gap-1 text-[11px] text-rose-400 mt-1 font-mono">
+                                <IconAlert className="w-3 h-3" /> {errors.zipCode}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Logistics */}
+                    <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-6 space-y-4">
+                      <div className="flex items-center gap-2.5 border-b border-slate-800/80 pb-3">
+                        <span className="font-mono text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                          03
+                        </span>
+                        <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">
+                          Logistics Routing Method
+                        </h3>
+                      </div>
+
+                      <div className="space-y-3 pt-1">
+                        {SHIPPING_METHODS.map(method => (
+                          <label 
+                            key={method.id}
+                            className={`flex items-center justify-between p-3.5 rounded-lg border cursor-pointer transition ${
+                              formData.shippingMethod === method.id 
+                                ? 'bg-slate-950 border-emerald-500 text-white' 
+                                : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <input 
+                                type="radio"
+                                name="shippingMethod"
+                                value={method.id}
+                                checked={formData.shippingMethod === method.id}
+                                onChange={() => setFormData({ ...formData, shippingMethod: method.id })}
+                                className="w-4 h-4 text-emerald-500 bg-slate-900 border-slate-700 focus:ring-emerald-500"
+                              />
+                              <div>
+                                <div className="text-xs font-mono font-bold text-white flex items-center gap-2">
+                                  {method.name}
+                                  <span className="text-[10px] text-slate-400 font-normal">[{method.duration}]</span>
+                                </div>
+                                <p className="text-[11px] text-slate-400 mt-0.5">{method.desc}</p>
+                              </div>
+                            </div>
+                            <div className="font-mono font-bold text-xs">
+                              {method.price === 0 ? <span className="text-emerald-400">FREE</span> : `$${method.price.toFixed(2)}`}
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Summary */}
+                  <div className="lg:col-span-1">
+                    <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-5 space-y-5 sticky top-24">
+                      <div className="border-b border-slate-800 pb-3">
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">ALLOCATION SUMMARY</span>
+                        <h3 className="text-base font-bold text-white font-sans">Order Ledger</h3>
+                      </div>
+
+                      <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
+                        {cart.map(item => (
+                          <div key={item.id} className="flex items-center justify-between gap-3 text-xs">
+                            <div className="flex items-center gap-2 truncate">
+                              <img src={item.image} alt={item.name} className="w-9 h-9 rounded object-cover bg-slate-950 border border-slate-800 shrink-0" />
+                              <div className="truncate">
+                                <p className="font-mono text-white truncate text-xs">{item.name}</p>
+                                <p className="text-[11px] font-mono text-slate-400">QTY: {item.quantity} × ${item.price.toFixed(2)}</p>
+                              </div>
+                            </div>
+                            <span className="font-mono font-bold text-slate-200 shrink-0">
+                              ${(item.price * item.quantity).toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="border-t border-slate-800 pt-3 space-y-2 text-xs font-mono">
+                        <div className="flex justify-between text-slate-400">
+                          <span>SUBTOTAL</span>
+                          <span className="text-white">${subtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-400">
+                          <span>LOGISTICS</span>
+                          <span className="text-white">
+                            {shippingCost === 0 ? 'FREE' : `$${shippingCost.toFixed(2)}`}
+                          </span>
+                        </div>
+                        <div className="border-t border-slate-800/80 pt-3 flex justify-between items-baseline">
+                          <span className="text-xs font-bold text-white font-sans">GRAND TOTAL</span>
+                          <span className="text-xl font-bold font-mono text-emerald-400">
+                            ${grandTotal.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button 
+                        type="submit"
+                        className="w-full py-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-slate-950 font-mono font-bold text-xs flex items-center justify-center gap-2 transition shadow-sm"
+                      >
+                        <IconShield className="w-3.5 h-3.5" />
+                        <span>PLACE ORDER NOW</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* 4. Confirmation */}
+            {currentStep === 'confirmation' && completedOrder && (
+              <div className="max-w-3xl mx-auto space-y-8">
+                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center space-y-4">
+                  <div className="w-14 h-14 mx-auto rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+                    <IconCheck className="w-7 h-7" />
+                  </div>
+
+                  <div>
+                    <span className="font-mono text-xs px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                      STATUS CODE: 200 OK / PROCESSED
+                    </span>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white font-sans mt-3">
+                      Order Placed Successfully!
+                    </h1>
+                    <p className="text-xs text-slate-400 font-mono mt-1">
+                      Transaction receipt dispatched to: <span className="text-emerald-400">{completedOrder.customerEmail}</span>
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800/80 text-left font-mono">
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase block tracking-wider">Order ID</span>
+                      <span className="text-xs font-bold text-emerald-400">{completedOrder.orderId}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase block tracking-wider">Customer Name</span>
+                      <span className="text-xs font-bold text-white truncate block">{completedOrder.customerName}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase block tracking-wider">Order Date</span>
+                      <span className="text-[11px] text-slate-300 block">{completedOrder.orderDate}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase block tracking-wider">Order Status</span>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        {completedOrder.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6">
+                  <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                    <div className="flex items-center gap-2">
+                      <IconPackage className="w-4 h-4 text-emerald-400" />
+                      <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">
+                        Ordered Products Ledger
+                      </h3>
+                    </div>
+                    <span className="text-xs font-mono text-slate-400">
+                      {completedOrder.products.length} Units Manifested
+                    </span>
+                  </div>
+
+                  <div className="divide-y divide-slate-800/80">
+                    {completedOrder.products.map(item => (
+                      <div key={item.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3.5">
+                          <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover bg-slate-950 border border-slate-800 shrink-0" />
+                          <div>
+                            <h4 className="text-xs font-bold font-mono text-white">{item.name}</h4>
+                            <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+                              ${item.price.toFixed(2)} × {item.quantity}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs font-bold font-mono text-white">
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border-t border-slate-800/80 pt-4 space-y-2 text-xs font-mono">
+                    <div className="flex justify-between text-slate-400">
+                      <span>SUBTOTAL</span>
+                      <span className="text-white">${completedOrder.subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-400">
+                      <span>LOGISTICS ({completedOrder.shippingMethodName})</span>
+                      <span className="text-white">
+                        {completedOrder.shippingCost === 0 ? 'FREE' : `$${completedOrder.shippingCost.toFixed(2)}`}
+                      </span>
+                    </div>
+                    <div className="border-t border-slate-800 pt-3 flex justify-between items-baseline">
+                      <span className="text-xs font-bold text-white font-sans">TOTAL AMOUNT</span>
+                      <span className="text-xl font-bold font-mono text-emerald-400">
+                        ${completedOrder.grandTotal.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-950 rounded-lg p-3.5 border border-slate-800 text-xs font-mono text-slate-400 space-y-1">
+                    <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">DISPATCH TARGET</span>
+                    <p className="text-slate-200">{completedOrder.customerAddress}</p>
+                    <p className="text-slate-400">Contact: {completedOrder.customerPhone}</p>
+                  </div>
+
+                  <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                    <button 
+                      onClick={() => {
+                        setCompletedOrder(null);
+                        setCurrentStep('products');
+                      }}
+                      className="flex-1 py-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs flex items-center justify-center gap-2 transition"
+                    >
+                      <span>NEW ORDER / CONTINUE</span>
+                      <IconArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button 
+                      onClick={() => window.print()}
+                      className="px-5 py-3 rounded-lg bg-slate-950 hover:bg-slate-900 text-slate-300 font-mono text-xs border border-slate-800 transition flex items-center justify-center gap-2"
+                    >
+                      <IconPrinter className="w-3.5 h-3.5" />
+                      <span>PRINT RECEIPT</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* Footer */}
+          <footer className="border-t border-slate-900 bg-slate-950 py-8 text-xs font-mono text-slate-500">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-400 font-bold">CODEX.COMMERCE</span>
+                <span>/ API-GRADE PRODUCT SYSTEM</span>
+              </div>
+              <p className="text-slate-600">Enterprise Practical Exercise Architecture</p>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
