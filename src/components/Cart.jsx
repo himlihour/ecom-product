@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconTrash, IconArrowRight, IconArrowLeft, IconPlus, IconMinus } from './Icons';
+import { IconTrash, IconArrowRight, IconArrowLeft, IconPlus, IconMinus, IconShoppingBag } from './Icons';
 
 export default function Cart({ cart, onUpdateQty, onRemoveItem, onProceedToCheckout, onBackToProducts }) {
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -26,12 +26,12 @@ export default function Cart({ cart, onUpdateQty, onRemoveItem, onProceedToCheck
 
       {cart.length === 0 ? (
         <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-16 text-center space-y-4">
-          <div className="w-12 h-12 mx-auto rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center font-mono text-slate-400">
-            [NULL]
+          <div className="w-12 h-12 mx-auto rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400">
+            <IconShoppingBag className="w-6 h-6 text-slate-500" />
           </div>
           <h3 className="text-lg font-bold text-white font-mono">CART IS EMPTY</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            No items have been assigned to your procurement session. Select items from the catalog.
+            Your shopping cart is currently empty. Explore products from the catalog.
           </p>
           <button 
             onClick={onBackToProducts}
