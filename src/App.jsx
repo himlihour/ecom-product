@@ -41,10 +41,10 @@ export default function App() {
       prevCart.map(item => {
         if (item.id === productId) {
           const newQty = item.quantity + delta;
-          return newQty > 0 ? { ...item, quantity: newQty } : null;
+          return newQty >= 1 ? { ...item, quantity: newQty } : item;
         }
         return item;
-      }).filter(Boolean)
+      })
     );
   };
 

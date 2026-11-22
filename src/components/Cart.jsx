@@ -84,7 +84,10 @@ export default function Cart({ cart, onUpdateQty, onRemoveItem, onProceedToCheck
                   <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5">
                     <button 
                       onClick={() => onUpdateQty(item.id, -1)}
-                      className="w-7 h-7 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center justify-center transition"
+                      disabled={item.quantity <= 1}
+                      className={`w-7 h-7 rounded bg-slate-900 text-slate-300 flex items-center justify-center transition ${
+                        item.quantity <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-slate-800'
+                      }`}
                       aria-label="Decrease quantity"
                     >
                       <IconMinus className="w-3 h-3" />
