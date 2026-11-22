@@ -3,7 +3,7 @@ import { IconStar, IconPlus } from './Icons';
 
 export default function ProductList({ products, cart, onAddToCart }) {
   return (
-    <div className="space-y-8 relative z-10">
+    <div className="space-y-8 relative z-10 select-none">
       {/* Header Banner without unwanted tags */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
         <div>

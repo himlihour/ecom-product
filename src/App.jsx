@@ -10,10 +10,7 @@ import { PRODUCTS } from './data/products';
 export default function App() {
   const [currentStep, setCurrentStep] = useState('products');
   
-  const [cart, setCart] = useState([
-    { ...PRODUCTS[0], quantity: 1 },
-    { ...PRODUCTS[1], quantity: 2 }
-  ]);
+  const [cart, setCart] = useState([]);
 
   const [completedOrder, setCompletedOrder] = useState(null);
   const [isCartBumping, setIsCartBumping] = useState(false);
@@ -86,7 +83,7 @@ export default function App() {
   }, [cart]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950 antialiased relative">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans select-none antialiased relative">
       
       {/* Spider Web & Light Cursor Wave Background */}
       <SpiderWebBackground />
@@ -143,7 +140,7 @@ export default function App() {
       <footer className="border-t border-slate-900 bg-slate-950/80 backdrop-blur-sm py-8 text-xs font-mono text-slate-500 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-emerald-400 font-bold">CODEX.COMMERCE</span>
+            <span className="text-emerald-400 font-bold">Kiro.Shop</span>
             <span>/ API-GRADE PRODUCT SYSTEM</span>
           </div>
           <p className="text-slate-600">Procurement & Fulfillment Architecture</p>

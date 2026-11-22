@@ -24,7 +24,7 @@ export default function Navbar({ currentStep, setCurrentStep, cartCount, cartTot
           <div>
             <div className="flex items-center gap-2">
               <span className="text-base font-bold tracking-tight text-white font-mono">
-                CODEX<span className="text-emerald-400">.COMMERCE</span>
+                Kiro<span className="text-emerald-400">.Shop</span>
               </span>
               <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 PROD v1.0

@@ -6,7 +6,7 @@ export default function Cart({ cart, onUpdateQty, onRemoveItem, onProceedToCheck
   const totalUnits = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 select-none">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
         <div>
